@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' show Client;
 import 'package:moviesapp/models/genre_model.dart';
 import 'package:moviesapp/models/item_model.dart';
+import 'package:moviesapp/models/trailer_model.dart';
 
 class MovieApiProvider{
   Client client = Client();
@@ -39,6 +40,18 @@ class MovieApiProvider{
     print(response.body.toString());
     if (response.statusCode == 200){
       return GenreModel.fromJson(json.decode(response.body),);
+    }
+    else{
+      throw Exception('Failed to load post');
+    }
+  }
+
+  Future<TrailerModel> fetchTrailers(int movie_id) async {
+    print("entered trailer");
+    final response = await client.get("https://api.themoviedb.org/3/movie/" + movie_id.toString() +"/videos?api_key=$apikey");
+    print(response.body.toString());
+    if (response.statusCode == 200){
+      return TrailerModel.fromJson(json.decode(response.body),);
     }
     else{
       throw Exception('Failed to load post');

@@ -25,6 +25,10 @@ dependencies:
     sdk: flutter
   http:
   rxdart: ^0.22.0
+  url_launcher: ^5.7.10
+  shared_preferences: ^0.5.12+4
+  carousel_slider: ^1.3.0
+  dots_indicator: ^0.0.5
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -46,13 +50,13 @@ flutter:
   uses-material-design: true
 
   fonts:
-    - family: Oswald-SemiBold
+    - family: PTSans-Regular
       fonts:
-        - asset: fonts/Oswald-SemiBold.ttf
+        - asset: fonts/PTSans-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+     - assets/images/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
