@@ -8,38 +8,37 @@ import 'package:http/http.dart' show Client;
 import 'package:moviesapp/blocs/trailer_bloc.dart';
 import 'package:moviesapp/models/favorite_trailer.dart';
 import 'package:moviesapp/models/favorites.dart';
-import 'package:moviesapp/models/item_model.dart';
+import 'package:moviesapp/models/genre_model.dart';
 import 'package:moviesapp/models/trailer_model.dart';
 import 'package:moviesapp/resources/home_presenter.dart';
 import 'package:moviesapp/ui/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class MovieDetails extends StatefulWidget {
-  Result data;
-  String genres;
-  MovieDetails(this.data ,this.genres);
+class SearchDetail extends StatefulWidget {
   @override
-  _MovieDetailsState createState() => _MovieDetailsState();
+  dynamic product;
+  GenreModel genreModel;
+  SearchDetail({this.product , this.genreModel});
+  _SearchDetailState createState() => _SearchDetailState();
 }
 
-IconData myicon;
 String backdrop_path = "";
-
-class _MovieDetailsState extends State<MovieDetails> implements HomeContract{
-
+String genres = "";
+class _SearchDetailState extends State<SearchDetail> implements HomeContract{
   HomePresenter homePresenter;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     homePresenter = new HomePresenter(this);
-    myicon = Icons.favorite_border;
-    backdrop_path = widget.data.backdrop_path;
+    backdrop_path = widget.product.backdrop_path;
+    genres = widget.genreModel.getGenre(widget.product.genre_ids);
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ContentPage(widget.data , widget.genres , homePresenter),
+      body: ContentPage(widget.product,genres , homePresenter),
     );
   }
 
@@ -49,20 +48,11 @@ class _MovieDetailsState extends State<MovieDetails> implements HomeContract{
   }
 }
 
-// _launchURL(String _url) async{
-//   if (await canLaunch(_url)){
-//     await launch(_url);
-//   }else {
-//     throw 'Could not launch $_url';
-//   }
-// }
-
 class ContentPage extends StatefulWidget {
-  Result data;
+  dynamic data;
   String genres;
   HomePresenter homePresenter;
-  ContentPage(this.data ,this.genres, this.homePresenter);
-
+  ContentPage(this.data , this.genres , this.homePresenter);
   @override
   _ContentPageState createState() => _ContentPageState();
 }
@@ -73,6 +63,7 @@ class _ContentPageState extends State<ContentPage> {
   bool isItRecord = false;
   bool isLoad = false;
   TrailerModel trailerData;
+
   @override
   void setState(fn) {
     // TODO: implement setState
@@ -86,7 +77,7 @@ class _ContentPageState extends State<ContentPage> {
       isLoad = true;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     double _width = MediaQuery.of(context).size.width;
@@ -99,13 +90,13 @@ class _ContentPageState extends State<ContentPage> {
           new Container(
             height: 360,
             decoration: BoxDecoration(
-              image: new DecorationImage(
-                fit: BoxFit.fitWidth,
-                alignment: FractionalOffset.topCenter,
-                image: NetworkImage(
-                  widget.data.poster_path.replaceAll("w185", "w400")
+                image: new DecorationImage(
+                    fit: BoxFit.fitWidth,
+                    alignment: FractionalOffset.topCenter,
+                    image: NetworkImage(
+                        widget.data.poster_path.replaceAll("w185", "w400")
+                    )
                 )
-              )
             ),
           ),
           Positioned(
@@ -121,7 +112,7 @@ class _ContentPageState extends State<ContentPage> {
                 ),
               )),
           isLoad
-          ?FutureBuilder<bool>(
+              ?FutureBuilder<bool>(
             future: widget.homePresenter.isItRecord(widget.data.id),
             builder: (context, snapshot){
               if(snapshot.hasError) print(snapshot.error);
@@ -162,7 +153,7 @@ class _ContentPageState extends State<ContentPage> {
                   ),
                 ),
               )
-             :Positioned(
+                  :Positioned(
                   right: 20,
                   top: 50,
                   child: InkWell(
@@ -196,7 +187,7 @@ class _ContentPageState extends State<ContentPage> {
                   ));
             },
           )
-        : Container(),
+              : Container(),
           Positioned(
             top: 280,
             child: Container(
@@ -204,18 +195,18 @@ class _ContentPageState extends State<ContentPage> {
               width: _width,
               height: 80,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  stops: [0.1 , 0.3 ,0.5 , 0.7 ,0.9],
+                  gradient: LinearGradient(
+                    stops: [0.1 , 0.3 ,0.5 , 0.7 ,0.9],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                  colors: [
-                    bgColor.withOpacity(0.01),
-                    bgColor.withOpacity(0.25),
-                    bgColor.withOpacity(0.6),
-                    bgColor.withOpacity(0.9) ,
-                  bgColor] ,
+                    colors: [
+                      bgColor.withOpacity(0.01),
+                      bgColor.withOpacity(0.25),
+                      bgColor.withOpacity(0.6),
+                      bgColor.withOpacity(0.9) ,
+                      bgColor] ,
 
-                )
+                  )
               ),
             ),
           ),
@@ -225,8 +216,8 @@ class _ContentPageState extends State<ContentPage> {
             child: Container(
               width: _width -20,
               child: new Text(widget.data.title,
-              style: TextStyle(color: Colors.white ,
-                  fontSize: 20 , fontWeight: FontWeight.bold),),
+                style: TextStyle(color: Colors.white ,
+                    fontSize: 20 , fontWeight: FontWeight.bold),),
             ),
           ),
           Positioned(
@@ -337,7 +328,7 @@ class _ContentPageState extends State<ContentPage> {
                                 fontSize: 24 , fontWeight: FontWeight.bold),),
                           SizedBox(height: 16,),
                           PreloadContent(
-                             movieId: widget.data.id ,
+                              movieId: widget.data.id ,
                               callback: doSomething)
                         ],
                       ),
@@ -352,31 +343,20 @@ class _ContentPageState extends State<ContentPage> {
     );
   }
 }
-// class GetGenres extends StatefulWidget {
-//   AsyncSnapshot snapshot;
-//   GetGenres(this.snapshot);
-//   @override
-//   _GetGenresState createState() => _GetGenresState();
-// }
-//
-// class _GetGenresState extends State<GetGenres> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: MediaQuery.of(context).size.width - 20,
-//       child: Wrap(
-//         direction: Axis.horizontal,
-//         spacing: 8,
-//         runSpacing: 8 ,
-//         crossAxisAlignment: WrapCrossAlignment.start,
-//         children: <Widget>[
-//
-//         ],
-//       ),
-//     );
-//   }
-//
-// }
+
+Widget GenreItem(String genre){
+  return Container(
+    decoration: BoxDecoration(
+        border: Border.all(color: Colors.white),
+        borderRadius: BorderRadius.circular(10)
+    ),
+    child: Padding(
+      padding: EdgeInsets.only(left: 10 , right: 10 ,top: 5 ,bottom: 5),
+      child: new Text(genre,
+        style: TextStyle(color: Colors.white),),
+    ),
+  );
+}
 
 class GenresItems extends StatefulWidget {
   String genres;
@@ -434,15 +414,16 @@ class _GenresItemsState extends State<GenresItems> {
     return Container(
       width: MediaQuery.of(context).size.width - 40,
       child: Wrap(
-        direction: Axis.horizontal,
-        spacing: 8,
-        runSpacing: 8 ,
-        crossAxisAlignment: WrapCrossAlignment.start,
-        children: values
+          direction: Axis.horizontal,
+          spacing: 8,
+          runSpacing: 8 ,
+          crossAxisAlignment: WrapCrossAlignment.start,
+          children: values
       ),
     );
   }
 }
+
 
 class PreloadContent extends StatefulWidget {
   final MyCallback callback;
@@ -464,13 +445,13 @@ class _PreloadContentState extends State<PreloadContent> {
             int itmRowCount = (snapshot.data.results.length /2).round();
             double _height = itmRowCount * 155.0;
             return Container(
-              width: MediaQuery.of(context).size.width -40,
-              height: _height,
-              child: TrailerPage(snapshot, widget.callback)
+                width: MediaQuery.of(context).size.width -40,
+                height: _height,
+                child: TrailerPage(snapshot, widget.callback)
             );
           } else
             return new Text('Not found Trailer',
-            style: TextStyle(color: Colors.white),);
+              style: TextStyle(color: Colors.white),);
         }
         else if(snapshot.hasError){
           return Text(snapshot.error.toString());
@@ -482,11 +463,20 @@ class _PreloadContentState extends State<PreloadContent> {
   }
 }
 
-Future insertFavorite(BuildContext context , HomePresenter homepresenter, Result data , String genres , TrailerModel trailerData) async{
+Future insertFavorite(BuildContext context , HomePresenter homepresenter, dynamic data , String genres , TrailerModel trailerData) async{
   Client client = Client();
   Uint8List _image = await client.readBytes(data.poster_path.replaceAll("w185", "w400"));
   Uint8List _image_back = await client.readBytes(data.backdrop_path);
-  Favorites favorite = new Favorites(data.title, data.id, _image, _image_back,data.vote_count, data.vote_average, genres, data.overview , data.popularity.toString());
+  Favorites favorite = new Favorites(
+      data.title,
+      data.id,
+      _image,
+      _image_back,
+      data.vote_count,
+      data.vote_average,
+      genres,
+      data.overview ,
+      data.popularity.toString());
   await homepresenter.db.insertMovie(favorite);
   FavoriteTrailer mytrailers = FavoriteTrailer.fromJson(trailerData);
   for(var i =0; i < mytrailers.results.length ; i++){
@@ -495,7 +485,6 @@ Future insertFavorite(BuildContext context , HomePresenter homepresenter, Result
   }
   homepresenter.updateScreen();
 }
-
 
 class TrailerPage extends StatefulWidget {
   AsyncSnapshot<TrailerModel> snapshot;
@@ -559,7 +548,7 @@ class _TrailerPageState extends State<TrailerPage> {
                               color: Colors.black38,
                             ),
                             Positioned(
-                              top: 36,
+                                top: 36,
                                 left: (itemWidth - 36 - 16) /2,
                                 child: Icon(
                                   Icons.play_circle_filled,

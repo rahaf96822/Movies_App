@@ -7,9 +7,16 @@ import 'package:moviesapp/blocs/movies_bloc.dart';
 import 'package:moviesapp/blocs/movies_popular_bloc.dart';
 import 'package:moviesapp/models/genre_model.dart';
 import 'package:moviesapp/models/item_model.dart';
+import 'package:moviesapp/services/BackendService.dart';
 import 'package:moviesapp/ui/colors.dart';
+
+import 'package:moviesapp/ui/favorites_screen.dart';
 import 'package:moviesapp/ui/movie_details.dart';
+import 'package:moviesapp/ui/search_detail.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+
+final TextEditingController _typeAheadController = TextEditingController();
 
 class HomeScreen extends StatefulWidget {
 
@@ -93,25 +100,76 @@ class _ContentPageState extends State<ContentPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Text('Search' ,
-                  style: TextStyle(
-                      fontFamily: 'Oswald-SemiBold' ,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 30 ,
-                      color: Colors.white),),
+                Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Search' ,
+                        style: TextStyle(
+                            fontFamily: 'Oswald-SemiBold' ,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 30 ,
+                            color: Colors.white),),
+                      InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => new FavoritesScreen()));
+                        },
+                        child: Icon(
+                          Icons.favorite,
+                          size: 28,
+                          color: Colors.white,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
                 SizedBox(height: 6,),
-                TextField(
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 24
+                // TextField(
+                //   style: TextStyle(
+                //     color: textColor,
+                //     fontSize: 24
+                //   ),
+                //   decoration: new InputDecoration.collapsed(
+                //       hintText: 'Movie,Actors,Directors... ',
+                //     hintStyle: TextStyle(
+                //       color: textColor,
+                //       fontSize: 24
+                //     )
+                //   ),
+                // ),
+                TypeAheadField(
+                  textFieldConfiguration: TextFieldConfiguration(
+                    controller: _typeAheadController,
+                    autofocus: true,
+                    style: TextStyle(color: textColor , fontSize: 28),
+                    decoration: new InputDecoration.collapsed(
+                        hintText: 'Movie,Actors,Directors... ',
+                      hintStyle: TextStyle(
+                        color: textColor,
+                        fontSize: 24
+                      )
+                    ),
                   ),
-                  decoration: new InputDecoration.collapsed(
-                      hintText: 'Movie,Actors,Directors... ',
-                    hintStyle: TextStyle(
-                      color: textColor,
-                      fontSize: 24
-                    )
-                  ),
+                  suggestionsCallback: (pattern) async {
+                    return await BackendService.getSuggestions(pattern);
+                  },
+                  itemBuilder: (context,suggestion){
+                    return ListTile(
+                      leading: suggestion.poster_path != null
+                      ? Image.network(suggestion.poster_path)
+                      : Image.network("https://upload.wikimedia.org/wikipedia/commons/b/b9/No_Cover.jpg"),
+                      title: Text(suggestion.title),
+                      subtitle: Text("Release date : ${suggestion.release_date}"),
+                    );
+                  },
+                  onSuggestionSelected: (suggestion){
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => SearchDetail(
+                          product : suggestion,
+                          genreModel : widget.snapshotGenres.data
+                        )));
+                  },
                 ),
                 SizedBox(height: 12,),
                 Container(
@@ -186,20 +244,6 @@ class _ContentPageState extends State<ContentPage> {
         )
       ],
     );
-    // return StreamBuilder(
-    //   stream: bloc.allMovies,
-    //   // ignore: missing_return
-    //   builder:(context,AsyncSnapshot<ItemModel> snapshot){
-    //     if (snapshot.hasData){
-    //       return new Container(width: 500, height: 500,color: Colors.yellowAccent,);
-    //     }
-    //     else
-    //     {
-    //       print('Something is wrong!');
-    //     }
-    //    // else Center(child: CircularProgressIndicator(),);
-    //   } ,
-    // );
   }
 }
 
@@ -348,6 +392,9 @@ class _ItemsPopularLoadState extends State<ItemsPopularLoad> {
               children: <Widget>[
                 InkWell(
                   onTap: (){
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => MovieDetails(widget.snapshot.data.results[index], genres)
+                    ));
                   },
                   child: Container(
                     child:  new ClipRRect(

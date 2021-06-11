@@ -51,12 +51,13 @@ class Result{
     vote_average = result['vote_average'].toString();
     title = result['title'].toString();
     popularity = result['popularity'];
-    poster_path = "http://image.tmdb.org/t/p/w185//" + result['poster_path'].toString();
+    poster_path = result['poster_path'] == null ? "https://upload.wikimedia.org/wikipedia/commons/b/b9/No_Cover.jpg" :
+        "http://image.tmdb.org/t/p/w185//" + result['poster_path'].toString();
 
     for (var i=0; i< result['genre_ids'].length ; i++){
       genre_ids.add(result['genre_ids'][i]);
     }
-    backdrop_path = result['backdrop_path'].toString();
+    backdrop_path = result['backdrop_path'] == null ? poster_path : "http://image.tmdb.org/t/p/w185//" + result['backdrop_path'].toString();
     adult = result['adult'];
     overview = result['overview'];
     release_date = result['release_date'].toString();

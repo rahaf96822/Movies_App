@@ -49,7 +49,7 @@ class MovieApiProvider{
   Future<TrailerModel> fetchTrailers(int movie_id) async {
     print("entered trailer");
     final response = await client.get("https://api.themoviedb.org/3/movie/" + movie_id.toString() +"/videos?api_key=$apikey");
-    print(response.body.toString());
+   // print(response.body.toString());
     if (response.statusCode == 200){
       return TrailerModel.fromJson(json.decode(response.body),);
     }
