@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:moviesapp/funcs/fadetranslation.dart';
 import 'package:moviesapp/ui/colors.dart';
 import 'package:dots_indicator/dots_indicator.dart';
@@ -18,6 +19,8 @@ class _AppIntroScreenState extends State<AppIntroScreen> {
     );
   }
 }
+
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 int indexPage =0;
 
 class ContentPage extends StatefulWidget {
@@ -38,6 +41,16 @@ const _images = [
 ];
 
 class _ContentPageState extends State<ContentPage> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    var initAndroidSet = new AndroidInitializationSettings('app_icon');
+    var initset = new InitializationSettings(android: initAndroidSet);
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    flutterLocalNotificationsPlugin.initialize(initset);
+  }
   @override
   Widget build(BuildContext context) {
     return Stack(

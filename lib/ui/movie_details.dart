@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:achievement_view/achievement_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' show Client;
 import 'package:moviesapp/blocs/trailer_bloc.dart';
 import 'package:moviesapp/models/favorite_trailer.dart';
@@ -13,6 +14,8 @@ import 'package:moviesapp/models/trailer_model.dart';
 import 'package:moviesapp/resources/home_presenter.dart';
 import 'package:moviesapp/ui/colors.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
 class MovieDetails extends StatefulWidget {
   Result data;
@@ -31,6 +34,7 @@ class _MovieDetailsState extends State<MovieDetails> implements HomeContract{
   @override
   void initState() {
     // TODO: implement initState
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     super.initState();
     homePresenter = new HomePresenter(this);
     myicon = Icons.favorite_border;
@@ -144,7 +148,7 @@ class _ContentPageState extends State<ContentPage> {
                             Icons.movie,
                             color: Colors.white,
                           ),
-                          color: textColor,
+                          color: Colors.green[700],
                           textStyleTitle: TextStyle(
                             fontFamily: 'PTSans-Regular',
                           ),
@@ -168,6 +172,7 @@ class _ContentPageState extends State<ContentPage> {
                   child: InkWell(
                     onTap: (){
                       setState(() {
+                        deleteNotification(widget.data.id);
                         widget.homePresenter.delete(widget.data.id);
                         isItRecord = false;
                         AchievementView(context,
@@ -177,7 +182,7 @@ class _ContentPageState extends State<ContentPage> {
                               Icons.movie,
                               color: Colors.white,
                             ),
-                            color: textColor,
+                            color: Colors.red[700],
                             textStyleTitle: TextStyle(
                                 fontFamily: 'PTSans-Regular'
                             ),
@@ -482,11 +487,49 @@ class _PreloadContentState extends State<PreloadContent> {
   }
 }
 
+Future showNotification(int id, String title , String body , String releaseDate, int dataCount) async{
+
+  releaseDate = "2021-5-19";
+  var d = new DateTime.now();
+  String hour = d.hour < 10 ? "0" + d.hour.toString() : d.hour.toString();
+  String min = d.minute < 10 ? "0" + d.minute.toString() : d.minute.toString();
+  String sec = d.second < 10 ? "0" + d.second.toString() : d.second.toString();
+  String mil = d.millisecond.toString();
+
+  releaseDate = releaseDate + " " + hour + ":" + min + ":" +sec + "," + mil;
+  var nextDay = DateTime.parse(releaseDate);
+  var difference = nextDay.difference(d);
+
+  int addSecondCounter = (dataCount +1) +15;
+
+  int _addsec = difference.inSeconds + addSecondCounter;
+
+  var ScheduledNotificationDateTime =d.add(new Duration(seconds: _addsec));
+  var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+      'your other channel id' ,
+      'your other channel name',
+      'your other channel description');
+  // var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+
+  NotificationDetails platformChannelSpecifics = new NotificationDetails(
+    android: androidPlatformChannelSpecifics);
+  await flutterLocalNotificationsPlugin.schedule(
+      id,
+      title,
+      body,
+      ScheduledNotificationDateTime,
+      platformChannelSpecifics);
+}
+
+Future deleteNotification(id) async{
+  await flutterLocalNotificationsPlugin.cancel(id);
+}
+
 Future insertFavorite(BuildContext context , HomePresenter homepresenter, Result data , String genres , TrailerModel trailerData) async{
   Client client = Client();
   Uint8List _image = await client.readBytes(data.poster_path.replaceAll("w185", "w400"));
-  Uint8List _image_back = await client.readBytes(data.backdrop_path);
-  Favorites favorite = new Favorites(data.title, data.id, _image, _image_back,data.vote_count, data.vote_average, genres, data.overview , data.popularity.toString());
+  //Uint8List _image_back = await client.readBytes(data.backdrop_path);
+  Favorites favorite = new Favorites(data.title, data.id, _image,data.vote_count, data.vote_average, genres, data.overview , data.popularity.toString());
   await homepresenter.db.insertMovie(favorite);
   FavoriteTrailer mytrailers = FavoriteTrailer.fromJson(trailerData);
   for(var i =0; i < mytrailers.results.length ; i++){
@@ -563,6 +606,7 @@ class _TrailerPageState extends State<TrailerPage> {
                                 left: (itemWidth - 36 - 16) /2,
                                 child: Icon(
                                   Icons.play_circle_filled,
+                                  color: Colors.white,
                                   size:36 ,
                                 ))
                           ],

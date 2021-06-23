@@ -466,12 +466,12 @@ class _PreloadContentState extends State<PreloadContent> {
 Future insertFavorite(BuildContext context , HomePresenter homepresenter, dynamic data , String genres , TrailerModel trailerData) async{
   Client client = Client();
   Uint8List _image = await client.readBytes(data.poster_path.replaceAll("w185", "w400"));
-  Uint8List _image_back = await client.readBytes(data.backdrop_path);
+  //Uint8List _image_back = await client.readBytes(data.backdrop_path);
   Favorites favorite = new Favorites(
       data.title,
       data.id,
       _image,
-      _image_back,
+      //_image_back,
       data.vote_count,
       data.vote_average,
       genres,

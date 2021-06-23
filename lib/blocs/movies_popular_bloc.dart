@@ -10,7 +10,8 @@ class MovieBloc{
   //Observable<ItemModel> get allMovies => movieFetcher.stream;
   Observable<ItemModel> get allPopularMovies => movieFetcher.stream;
 
-  fetchAllPopularMovies() async{
+  fetchAllPopularMovies(int page) async{
+    repository.page =page;
     ItemModel itemModel = await repository.fetchAllPopularMovies();
     movieFetcher.sink.add(itemModel);
   }

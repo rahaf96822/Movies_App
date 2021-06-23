@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:moviesapp/blocs/genre_bloc.dart';
 
 import 'package:moviesapp/blocs/movies_bloc.dart';
@@ -8,15 +9,19 @@ import 'package:moviesapp/blocs/movies_popular_bloc.dart';
 import 'package:moviesapp/models/genre_model.dart';
 import 'package:moviesapp/models/item_model.dart';
 import 'package:moviesapp/services/BackendService.dart';
+import 'package:moviesapp/ui/all_recents.dart';
 import 'package:moviesapp/ui/colors.dart';
 
 import 'package:moviesapp/ui/favorites_screen.dart';
 import 'package:moviesapp/ui/movie_details.dart';
+import 'package:moviesapp/ui/all_popular.dart';
 import 'package:moviesapp/ui/search_detail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 
+
 final TextEditingController _typeAheadController = TextEditingController();
+ FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
 class HomeScreen extends StatefulWidget {
 
@@ -34,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ));
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -51,6 +57,34 @@ class PreloadContent extends StatefulWidget {
 }
 
 class _PreloadContentState extends State<PreloadContent> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+   // showNotification();
+    super.initState();
+  }
+
+ // Future showNotification() async{
+ //    var ScheduledNotificationDateTime = new DateTime.now().add(new Duration(seconds: 10));
+ //    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
+ //        'your other channel id' ,
+ //      'your other channel name',
+ //        'your other channel description');
+ //   // var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
+ //
+ //    NotificationDetails platformChannelSpecifics = new NotificationDetails(
+ //      android: androidPlatformChannelSpecifics,
+ //      //iOS: iOSPlatformChannelSpecifics
+ //    );
+ //    await flutterLocalNotificationsPlugin.schedule(
+ //        0,
+ //        'scheduled title',
+ //        'scheduled body',
+ //        ScheduledNotificationDateTime,
+ //        platformChannelSpecifics);
+ //  }
+
   @override
   Widget build(BuildContext context) {
     bloc_genres.fetchAllGenres();
@@ -83,11 +117,13 @@ class _ContentPageState extends State<ContentPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    print(widget.snapshotGenres);
+    //print(widget.snapshotGenres);
+    _typeAheadController.clear();
   }
   @override
   Widget build(BuildContext context) {
-    bloc.fetchAllMovies();
+    _typeAheadController.clear();
+    bloc.fetchAllMovies(1);
     return Stack(
       children: <Widget>[
         Container(
@@ -141,10 +177,10 @@ class _ContentPageState extends State<ContentPage> {
                 TypeAheadField(
                   textFieldConfiguration: TextFieldConfiguration(
                     controller: _typeAheadController,
-                    autofocus: true,
+                    autofocus: false,
                     style: TextStyle(color: textColor , fontSize: 28),
                     decoration: new InputDecoration.collapsed(
-                        hintText: 'Movie,Actors,Directors... ',
+                        hintText: 'Enter movie name ',
                       hintStyle: TextStyle(
                         color: textColor,
                         fontSize: 24
@@ -178,66 +214,90 @@ class _ContentPageState extends State<ContentPage> {
                 SizedBox(height: 12,),
                 Container(
                   width: MediaQuery.of(context).size.width,
-                  height: 20,
-                  // color: Colors.red,
-                  child: Stack(
-                    children: <Widget>[
-                      Positioned(
-                          child: new Text(
-                            'Recent',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 22
-                            ),
-                          )),
-                      Positioned(
-                        top: 5,
-                        right: 20,
-                        child: new Text(
-                          'SEE ALL',
-                          style: TextStyle(
-                              color: textColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15
+                  height: MediaQuery.of(context).size.height,
+
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: 20,
+                          // color: Colors.red,
+                          child: Stack(
+                            children: <Widget>[
+                              Positioned(
+                                  child: new Text(
+                                    'Recent',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22
+                                    ),
+                                  )),
+                              Positioned(
+                                top: 5,
+                                right: 20,
+                                child: InkWell(
+                                  onTap: (){
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                                        AllRecents(widget.snapshotGenres)));
+                                  },
+                                  child: new Text(
+                                    'SEE ALL',
+                                    style: TextStyle(
+                                        color: textColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
                           ),
                         ),
-                      )
-                    ],
-                  ),
-                ),
-                RecentMovies(widget.snapshotGenres),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 20,
-                  // color: Colors.red,
-                  child: Stack(
-                    children: <Widget>[
-                      Positioned(
-                          child: new Text(
-                            'Popular',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 22
-                            ),
-                          )),
-                      Positioned(
-                        top: 5,
-                        right: 20,
-                        child: new Text(
-                          'SEE ALL',
-                          style: TextStyle(
-                              color: textColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15
+                        RecentMovies(widget.snapshotGenres),
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: 20,
+                          // color: Colors.red,
+                          child: Stack(
+                            children: <Widget>[
+                              Positioned(
+                                  child: new Text(
+                                    'Popular',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 22
+                                    ),
+                                  )),
+                              Positioned(
+                                top: 5,
+                                right: 20,
+                                child: InkWell(
+                                  onTap: (){
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                                        AllPopular(widget.snapshotGenres)));
+                                  },
+                                  child: new Text(
+                                    'SEE ALL',
+                                    style: TextStyle(
+                                        color: textColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
                           ),
                         ),
-                      )
-                    ],
+                        PopularMovies(widget.snapshotGenres),
+                      ],
+                    ),
                   ),
-                ),
-                PopularMovies(widget.snapshotGenres),
+                )
               ],
             ),
           )
@@ -257,21 +317,31 @@ class RecentMovies extends StatefulWidget {
 class _RecentMoviesState extends State<RecentMovies> {
   @override
   Widget build(BuildContext context) {
-    bloc.fetchAllMovies();
+    bloc.fetchAllMovies(1);
     return StreamBuilder(
       stream: bloc.allMovies,
       builder: (context,AsyncSnapshot<ItemModel> snapshot){
-        if(snapshot.hasData){
+        if (snapshot.connectionState == ConnectionState.active){
+          if(snapshot.hasData){
+            return Container(
+              margin: EdgeInsets.only(top: 20),
+              width: MediaQuery.of(context).size.width -20,
+              height: 300,
+              child: ItemsLoad(snapshot,widget.snapshotGenres),);
+          }
+          else if(snapshot.hasError){
+            return Text(snapshot.error.toString());
+          }
+          return Center(child: CircularProgressIndicator(),);
+        }
+        else if(snapshot.connectionState == ConnectionState.waiting)
+          return Center(child: CircularProgressIndicator(),);
+        else 
           return Container(
-            margin: EdgeInsets.only(top: 20),
-            width: MediaQuery.of(context).size.width -20,
-            height: 300,
-          child: ItemsLoad(snapshot,widget.snapshotGenres),);
-        }
-        else if(snapshot.hasError){
-          return Text(snapshot.error.toString());
-        }
-        return Center(child: CircularProgressIndicator(),);
+            child: Center(
+              child: new Text('Something is wrong'),
+            ),
+          );
       },
 
     );
@@ -345,23 +415,30 @@ class _PopularMoviesState extends State<PopularMovies> {
 
   @override
   Widget build(BuildContext context) {
-    bloc_popular.fetchAllPopularMovies();
+    bloc_popular.fetchAllPopularMovies(1);
     return Container(
       width: MediaQuery.of(context).size.width-20,
       height: MediaQuery.of(context).size.height - 500,
       child: StreamBuilder(
         stream: bloc_popular.allPopularMovies,
         builder: (context,AsyncSnapshot<ItemModel> snapshot){
-          if(snapshot.hasData){
-            return Container(
-              width: MediaQuery.of(context).size.width -20,
-              height: 300,
-              child: ItemsPopularLoad(snapshot , widget.snapshotGenres),);
-          }
-          else if(snapshot.hasError){
-            return Text(snapshot.error.toString());
-          }
-          return Center(child: CircularProgressIndicator(),);
+         if(snapshot.connectionState == ConnectionState.active){
+           if(snapshot.hasData){
+             return ItemsPopularLoad(snapshot , widget.snapshotGenres);
+           }
+           else if(snapshot.hasError){
+             return Text(snapshot.error.toString());
+           }
+           return Center(child: CircularProgressIndicator(),);
+         }
+         else if(snapshot.connectionState == ConnectionState.waiting)
+           return Center(child: CircularProgressIndicator(),);
+         else
+           return Container(
+             child: Center(
+               child: new Text('Something is wrong'),
+             ),
+           );
         },
 
       )
@@ -381,9 +458,12 @@ class _ItemsPopularLoadState extends State<ItemsPopularLoad> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+     // physics: NeverScrollableScrollPhysics(),
+      //shrinkWrap: true,
       scrollDirection: Axis.vertical,
       padding: EdgeInsets.only(top: 16),
-      itemCount: widget.snapshot.data.results.length,
+      itemCount: 4,
+      //itemCount: widget.snapshot.data.results.length,
       itemBuilder: (context , int index){
         String genres = widget.snapshotGenres.data.getGenre(widget.snapshot.data.results[index].genre_ids);
         return new Column(
@@ -445,3 +525,12 @@ class _ItemsPopularLoadState extends State<ItemsPopularLoad> {
     );
   }
 }
+
+// void initializeSetting()async{
+//   var initAndroidSet = new AndroidInitializationSettings('app_icon');
+//   // var initIosSet = new IOSInitializationSettings();
+//   var initset = new InitializationSettings(android: initAndroidSet);
+//
+//   flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+//   await flutterLocalNotificationsPlugin.initialize(initset);
+// }

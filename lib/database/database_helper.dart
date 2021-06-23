@@ -26,7 +26,7 @@ class DataBaseHelper{
   
   void _onCreate(Database db, int version) async{
     await db.execute(
-      "CREATE TABLE Favorites(id INTEGER PRIMARY KEY,name TEXT, movie_id INT,poster_path BLOB,backdrop_path BLOB,vote_count TEXT ,vote_average TEXT,genres TEXT,description TEXT,popularity TEXT )"
+      "CREATE TABLE Favorites(id INTEGER PRIMARY KEY,name TEXT, movie_id INT,poster_path BLOB,vote_count TEXT ,vote_average TEXT,genres TEXT,description TEXT,popularity TEXT )"
     );
 
     await db.execute(
@@ -65,7 +65,7 @@ class DataBaseHelper{
         list[i]['name'],
     list[i]['movie_id'],
     list[i]['poster_path'],
-    list[i]['backdrop_path'],
+    //list[i]['backdrop_path'],
     //list[i]['release_date'],
     list[i]['vote_count'],
     list[i]['vote_average'],

@@ -63,7 +63,7 @@ class Result{
     release_date = result['release_date'].toString();
   }
 
-  String get get_release_date => release_date;
+  //String get get_release_date => release_date;
   String get get_overview => overview;
   bool get get_adult => adult;
   String get get_backdrop_path => backdrop_path;

@@ -10,10 +10,10 @@ class MovieApiProvider{
   final apikey = "d8c7aae641b2f4852fdb1908c54eacf5";
   final baseUrl = "https://api.themoviedb.org/3/movie";
 
-  Future<ItemModel> fetchMovieList (bool isRecent) async {
-    print("entered");
-    final response = await client.get("https://api.themoviedb.org/3/movie/now_playing?api_key=$apikey");
-    print(response.body.toString());
+  Future<ItemModel> fetchMovieList (bool isRecent , int page) async {
+   // print("entered");
+    final response = await client.get("https://api.themoviedb.org/3/movie/now_playing?api_key=$apikey" + "&page=" + page.toString());
+    //print(response.body.toString());
     if (response.statusCode == 200){
       return ItemModel.fromJson(json.decode(response.body) , isRecent);
     }
@@ -22,10 +22,10 @@ class MovieApiProvider{
     }
   }
 
-  Future<ItemModel> fetchMoviePopularList (bool isRecent) async {
-    print("entered");
-    final response = await client.get("https://api.themoviedb.org/3/movie/popular?api_key=$apikey");
-    print(response.body.toString());
+  Future<ItemModel> fetchMoviePopularList (bool isRecent , int page) async {
+    //print("entered");
+    final response = await client.get("https://api.themoviedb.org/3/movie/popular?api_key=$apikey" +"&page=$page");
+    //print(response.body.toString());
     if (response.statusCode == 200){
       return ItemModel.fromJson(json.decode(response.body), isRecent);
     }

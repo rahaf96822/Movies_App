@@ -303,6 +303,7 @@ class _HomeScreenState extends State<HomeScreen> implements HomeContract{
                                                             left: (itemWidth - 36 - 16) /2,
                                                             child: Icon(
                                                               Icons.play_circle_filled,
+                                                              color: Colors.white,
                                                               size:36 ,
                                                             ))
                                                       ],
